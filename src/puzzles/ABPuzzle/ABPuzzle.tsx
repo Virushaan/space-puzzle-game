@@ -1,32 +1,65 @@
 import React from "react";
-import { Puzzle, Seed } from "../types";
+import { Puzzle, Seed, PuzzleProps, RulesProps } from "../types";
+
+interface ABInstance {}
 
 export interface ABRule {
   value: boolean;
 }
 
-export const ABPuzzle: Puzzle<null, ABRule> = {
+export interface ABAction {
+  value: boolean;
+}
+
+type Props = PuzzleProps<ABInstance, ABAction>;
+
+const renderPuzzle = ({
+  onAction,
+  done
+}: Props): JSX.Element => {
+
+  const onClick = (buttonName: string) => () => {
+    if (done) return;
+    onAction({
+      value: buttonName === 'a'
+    });
+  };
+
+  return (
+    <div>
+      <button disabled={done} onClick={onClick('a')}>A</button>
+      <button disabled={done} onClick={onClick('b')}>B</button>
+    </div>
+  );
+}
+
+const renderRules = ({
+  rules,
+}: RulesProps<ABRule>): JSX.Element => {
+  return (
+    <div>{rules.value ? 'A' : 'B'}</div>
+  );
+}
+
+export const ABPuzzle: Puzzle<ABInstance, ABRule, ABAction> = {
   name: "ABPuzzle",
 
-  genPuzzle: (ruleSeed: Seed, instanceSeed: Seed) => {
-    return null;
+  genPuzzle: (_: Seed, __: Seed) => {
+    return {};
   },
 
-  genRule: (ruleSeed: Seed): ABRule => {
-    const example: ABRule = { value: true };
-    return example;
-  },
+  genRules: (ruleSeed: Seed): ABRule => ({
+    value: (ruleSeed % BigInt(2)) === BigInt(1)
+  }),
 
-  renderPuzzle: (instance: null): JSX.Element => {
-    return (
-      <div>
-        <button>A</button>
-        <button>B</button>
-      </div>
-    );
-  },
+  renderPuzzle,
+  renderRules,
 
-  renderRules: (rules: ABRule): JSX.Element => {
-    return <div></div>;
-  },
+  checkAction: ({ value }: ABAction, rules: ABRule) => {
+    if (value === rules.value) {
+      return 'correct'
+    } else {
+      return 'incorrect'
+    }
+  }
 };

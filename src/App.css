@@ -36,3 +36,37 @@
     transform: rotate(360deg);
   }
 }
+
+.puzzle {
+  background-color: #aaa;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.puzzle.done {
+  background-color: #79a;
+}
+
+.connection-button {
+  border: none;
+  margin: 5px;
+  background: #666;
+  color: white;
+}
+
+.connection-button.lit {
+  color: yellow;
+}
+
+.connection-button.pressed {
+  background-color: #222;
+}
+
+.connection-puzzle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.connection-rules {
+  font-size: 12px;
+}
