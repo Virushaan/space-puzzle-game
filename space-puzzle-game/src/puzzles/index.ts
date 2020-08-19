@@ -1,1 +1,0 @@
-export { Puzzle } from './puzzle-types';
