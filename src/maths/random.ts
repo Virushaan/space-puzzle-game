@@ -10,23 +10,27 @@ export const generateSeed = (): bigint => {
 
 export class SeededRandom {
 
-  private engine: seedrandom.prng
+  private engine: seedrandom.prng;
 
   constructor(ruleSeed: bigint, instanceSeed = BigInt(0)) {
-    this.engine = seedrandom(`${ruleSeed}${instanceSeed}`)
+    this.engine = seedrandom(`${ruleSeed}${instanceSeed}`);
   }
 
   nextDouble(): number {
-    return this.engine()
+    return this.engine();
   }
 
   nextInt(max: number): number {
     return Math.floor(this.engine() * max)
   }
+
+  nextBigInt(max = 1000000000): bigint {
+    return BigInt(this.nextInt(max));
+  }
 }
 
 export const seededShuffle = <T>(seed: bigint, array: T[]): T[] => {
-  const rand = new SeededRandom(seed)
+  const rand = new SeededRandom(seed);
 
   for (let i = array.length - 1; i > 0; i--) {
     let j = rand.nextInt(i + 1);
