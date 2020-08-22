@@ -27,11 +27,11 @@ const pickPuzzles = (gameSeed: Seed): PuzzleData[] => {
   const rand = new SeededRandom(gameSeed);
 
   return [
+    makePuzzle(PairsPuzzle, rand),
     makePuzzle(ABPuzzle, rand),
     makePuzzle(ConnectionPuzzle, rand),
     makePuzzle(ConnectionPuzzle, rand),
     makePuzzle(ConnectionPuzzle, rand),
-    makePuzzle(PairsPuzzle, rand),
   ];
 }
 

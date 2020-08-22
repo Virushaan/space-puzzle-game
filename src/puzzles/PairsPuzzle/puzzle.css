@@ -19,3 +19,20 @@ div.pairs-puzzle {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
+
+div.pairs-rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  border: 1px solid black;
+}
+
+div.pairs-rules > div {
+  text-align: center;
+  border: 1px solid black;
+  cursor: pointer;
+}
+
+div.pairs-rules > div.active {
+  background-color: black;
+  color: 'white';
+}

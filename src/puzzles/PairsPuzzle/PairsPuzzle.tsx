@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Puzzle, Seed, PuzzleProps, RulesProps } from "../types";
-import { seededShuffle } from "../../maths/random";
+import { seededShuffle, SeededRandom } from "../../maths/random";
 import "./puzzle.css";
 
 type Word = string;
-type Pair = [Word, Word];
 type PartialPair = [Word, Word | undefined];
 
 interface Instance {
   words: Word[];
 }
 
-const words: Word[] = [];
-for (let i = 0; i < 50; i++) {
-  words.push(i.toString());
-}
+const words: Word[] =
+  'which there their about would these other words could write first water after where right think three years place sound great again still every small found those never under might while house world below asked going large until along shall being often earth began since study night light above paper parts young story point times heard whole white given means'.split(' ');
+// for (let i = 0; i < 50; i++) {
+//   words.push(i.toString());
+// }
 
 export interface Rules {
-  words: Word[];
-  pairs: Pair[];
+  wordGrid: Word[];
 }
 
 export interface Action {
@@ -41,8 +40,7 @@ const RenderPuzzle = ({
     };
     const result = onAction(action);
     if (result === 'incorrect') {
-      // Something bad happened!
-      // Clear last pair?
+      setPressed(pressed.slice(1));
     }
   }, [pressed, onAction]);
 
@@ -101,37 +99,93 @@ const RenderPuzzle = ({
   );
 }
 
+const GridItem = ({ word }: { word: Word }) => {
+  const [active, setActive] = useState(false);
+
+  const onClick = () => {
+    setActive(!active);
+  }
+
+  return (
+    <div className={active ? 'active' : ''} onClick={onClick}>{word}</div>
+  );
+}
+
 const renderRules = ({
   rules,
 }: RulesProps<Rules>): JSX.Element => {
   return (
-    <div>
-      {rules.pairs.map(([wordA, wordB]) => (
-        <div>[{wordA}, {wordB}]</div>
-      ))}
+    <div className="pairs-rules">
+      {rules.wordGrid.map((word) => <GridItem word={word} />)}
     </div>
   );
 }
 
-function id<T>(x: T) {
-  return x;
+const getWords = (ruleSeed: Seed) => {
+  const myWords = words.slice();
+  return seededShuffle(ruleSeed, myWords).slice(0, 20);
 }
 
-const getWords = (ruleSeed: Seed) => {
-  const myWords = words.map(id);
-  return seededShuffle(ruleSeed, myWords);
+const NUM_PAIRS_IN_INSTANCE = 4;
+const NUM_WORDS_IN_INSTANCE = NUM_PAIRS_IN_INSTANCE * 2;
+const ROWS = 4;
+const COLS = 5;
+
+const rowAndColumn = (
+  index: number
+): { row: number, column: number } => ({
+  row: Math.floor(index / ROWS),
+  column: index % COLS,
+});
+
+function choice<T>(rand: SeededRandom, list: T[]) {
+  return list[rand.nextInt(list.length)];
+}
+
+const makePairs = (
+  ruleSeed: Seed,
+  instanceSeed: Seed,
+  wordGrid: Word[]
+): Word[] => {
+  const rand = new SeededRandom(ruleSeed, instanceSeed)
+  const words: Word[] = [];
+
+  while (words.length < NUM_WORDS_IN_INSTANCE) {
+    const [first, index] = choice(
+      rand,
+      wordGrid
+        .map<[Word, number]>((word, index) => [word, index])
+        .filter(([word]) => !words.includes(word)),
+    );
+
+    const { row, column } = rowAndColumn(index);
+    const neighbours = wordGrid.filter((word, index) => {
+      const { row: thisRow, column: thisColumn } = rowAndColumn(index);
+      // Only allow words we haven't seen and words in the same row XOR column
+      return !words.includes(word)
+        && ((thisRow === row) !== (thisColumn === column));
+    });
+
+    const second = choice(rand, neighbours);
+
+    if (second) {
+      words.push(first, second);
+    }
+  }
+
+  seededShuffle(instanceSeed, words);
+
+  return words;
 }
 
 export const PairsPuzzle: Puzzle<Instance, Rules, Action> = {
   name: "Pairs Puzzle",
 
-  genPuzzle: (gameSeed: Seed, ruleSeed: Seed) => {
+  genPuzzle: (ruleSeed: Seed, instanceSeed: Seed) => {
     const words = getWords(ruleSeed);
-    
-    seededShuffle(gameSeed, words);
 
     return {
-      words: words.splice(0, 8)
+      words: makePairs(ruleSeed, instanceSeed, words),
     };
   },
 
@@ -139,20 +193,42 @@ export const PairsPuzzle: Puzzle<Instance, Rules, Action> = {
     const words = getWords(ruleSeed);
     
     return {
-      words,
-      pairs: []
+      wordGrid: words,
     }
   },
 
   renderPuzzle: RenderPuzzle,
   renderRules,
 
-  checkAction: (a: Action, rules: Rules) => {
+  checkAction: ({ pairs }: Action, { wordGrid }: Rules) => {
+    if (pairs.length === 0) {
+      return 'pending';
+    }
+
+    const failed = pairs.some(([first, second]) => {
+      if (!second) return false;
+      const { row: rowA, column: colA } = rowAndColumn(wordGrid.indexOf(first));
+      const { row: rowB, column: colB } = rowAndColumn(wordGrid.indexOf(second));
+
+      return rowA !== rowB && colA !== colB;
+    });
+
+    if (failed) {
+      return 'incorrect';
+    }
+
+    function wordCheck(word: Word | undefined): word is string {
+      return !!word;
+    }
+
+    const allWords = pairs
+      .reduce((list, [a, b]) => list.concat(a, b), [] as (Word | undefined)[])
+      .filter<Word>(wordCheck);
+
+    if (allWords.length === NUM_WORDS_IN_INSTANCE) {
+      return 'correct';
+    }
+
     return 'pending';
-    //if (value === rules.value) {
-    //  return 'correct'
-    //} else {
-    //  return 'incorrect'
-    //}
-  }
+  },
 };
