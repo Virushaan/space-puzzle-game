@@ -68,7 +68,7 @@ const RenderPuzzle = ({
     if (result === 'incorrect') {
       setPressed(Array(names.length).fill(false));
     }
-  }, [pressed]);
+  }, [onAction, pressed]);
 
   const onClicker = (id: number) => () => {
     setPressed(
@@ -108,7 +108,7 @@ export const ConnectionPuzzle: Puzzle<Instance, Rules, Action> = {
 
     const newCondition = (count: number): Condition => {
       const first = rand.nextInt(8);
-      const second = (first + rand.nextInt(7)) % 8;
+      const second = (first + rand.nextInt(6) + 1) % 8;
       return {
         required: order.splice(0, count),
         solution: [first, second].sort() as [number, number]
@@ -122,9 +122,9 @@ export const ConnectionPuzzle: Puzzle<Instance, Rules, Action> = {
   renderPuzzle: RenderPuzzle,
   renderRules: ({ rules }) => (
     <div className="connection-rules">
-      {rules.conditions.map((condition) => {
+      {rules.conditions.map((condition, index) => {
         return (
-          <div>
+          <div key={index}>
             Required: {condition.required.map(num => names[num]).join(' or ')}
             Then: {condition.solution.map(num => names[num]).join()}
           </div>

@@ -60,6 +60,7 @@ export const Game = ({
       <div>
         {puzzles.map(({ puzzle, instanceSeed }, index) => (
           <PuzzleComponent
+            key={instanceSeed.toString()}
             puzzle={puzzle}
             onSuccess={onSuccess(index)}
             onFailure={onFailure}

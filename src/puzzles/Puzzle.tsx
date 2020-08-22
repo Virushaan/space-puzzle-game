@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { PuzzleComponentProps } from "./types";
 
 export const PuzzleComponent = <I, R, A>({
@@ -19,7 +19,7 @@ export const PuzzleComponent = <I, R, A>({
   const Element = puzzle.renderPuzzle;
   const Rules = puzzle.renderRules;
 
-  const onAction = (action: A) => {
+  const onAction = useCallback((action: A) => {
     if (complete) {
       return 'pending';
     }
@@ -32,7 +32,7 @@ export const PuzzleComponent = <I, R, A>({
     }
 
     return result;
-  }
+  }, [complete, instance, onFailure, onSuccess, puzzle, rules]);
 
   return (
     <div className={`puzzle ${complete ? 'done' : ''}`}>
