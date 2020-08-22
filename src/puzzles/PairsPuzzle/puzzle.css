@@ -1,0 +1,21 @@
+button {
+  border: none;
+  margin: 5px;
+}
+
+button.active {
+  background: #ddf;
+}
+
+button.done {
+  background: #ddd;
+}
+
+button.unused {
+  background: white;
+}
+
+div.pairs-puzzle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
