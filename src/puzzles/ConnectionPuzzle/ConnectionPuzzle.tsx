@@ -63,7 +63,7 @@ const RenderPuzzle = ({
         value ? index : -1
       ).filter(value => value >= 0),
     };
-    console.log(action);
+
     const result = onAction(action);
     if (result === 'incorrect') {
       setPressed(Array(names.length).fill(false));
@@ -116,7 +116,7 @@ export const ConnectionPuzzle: Puzzle<Instance, Rules, Action> = {
     };
 
     return {
-      conditions: [3, 2, 2, 1, 1, 0].map(newCondition)
+      conditions: [2, 2, 2, 1, 1, 0].map(newCondition)
     };
   },
   renderPuzzle: RenderPuzzle,

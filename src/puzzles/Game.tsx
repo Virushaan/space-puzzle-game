@@ -4,6 +4,7 @@ import { SeededRandom } from "../maths/random";
 import { ABPuzzle } from "./ABPuzzle";
 import { ConnectionPuzzle } from "./ConnectionPuzzle/ConnectionPuzzle";
 import { PuzzleComponent } from "./Puzzle";
+import { PairsPuzzle } from "./PairsPuzzle/PairsPuzzle";
 
 interface PuzzleData {
   instanceSeed: Seed;
@@ -26,10 +27,11 @@ const pickPuzzles = (gameSeed: Seed): PuzzleData[] => {
   const rand = new SeededRandom(gameSeed);
 
   return [
+    makePuzzle(PairsPuzzle, rand),
     makePuzzle(ABPuzzle, rand),
     makePuzzle(ConnectionPuzzle, rand),
     makePuzzle(ConnectionPuzzle, rand),
-    makePuzzle(ConnectionPuzzle, rand)
+    makePuzzle(ConnectionPuzzle, rand),
   ];
 }
 
