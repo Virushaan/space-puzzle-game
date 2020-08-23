@@ -4,7 +4,7 @@ import { seededShuffle, SeededRandom } from "../../maths/random";
 import "./puzzle.css";
 
 type Word = string;
-type PartialPair = [Word, Word | undefined];
+type PartialPair = [Word, Word | undefined, string];
 
 interface Instance {
   words: Word[];
@@ -12,9 +12,6 @@ interface Instance {
 
 const words: Word[] =
   'which there their about would these other words could write first water after where right think three years place sound great again still every small found those never under might while house world below asked going large until along shall being often earth began since study night light above paper parts young story point times heard whole white given means'.split(' ');
-// for (let i = 0; i < 50; i++) {
-//   words.push(i.toString());
-// }
 
 export interface Rules {
   wordGrid: Word[];
@@ -25,6 +22,16 @@ export interface Action {
 }
 
 type Props = PuzzleProps<Instance, Action>;
+
+const COLOUR_CLASSES = ['pair-a', 'pair-b', 'pair-c', 'pair-d'];
+
+const newColour = (pairs: PartialPair[]) => {
+  const options = new Set(COLOUR_CLASSES);
+  pairs.forEach(pair => {
+    options.delete(pair[2]);
+  });
+  return options.values().next().value;
+}
 
 const RenderPuzzle = ({
   onAction,
@@ -46,51 +53,49 @@ const RenderPuzzle = ({
 
   const onClick = (word: Word) => () => {
     if (done) return;
-    const currentPair = pressed[0];
-    if (!currentPair) {
+
+    if (pressed.some(([a, b]) => word === a || word === b)) {
       setPressed([
-        [word, undefined],
+        ...pressed.filter(([a, b]) => word !== a && word !== b),
       ]);
-    } else if (!currentPair[1]) {
-      if (currentPair[0] === word) {
-        // Clicking only unconfirmed word
-        setPressed([
-          ...pressed.slice(1),
-        ]);
-      } else {
-        setPressed([
-          [currentPair[0], word],
-          ...pressed.slice(1),
-        ]);
-      }
-    } else {
-      setPressed([
-        [word, undefined],
-        ...pressed,
-      ]);
+      return;
     }
+
+    const halfPair = pressed.find(([_, b]) => !b);
+    if (halfPair) {
+      const [a, _, colour] = halfPair;
+      setPressed([
+        [a, word, colour],
+        ...pressed.filter(([a, b]) => a && b),
+      ]);
+      return;
+    }
+
+    setPressed([
+      ...pressed,
+      [word, undefined, newColour(pressed)],
+    ]);
   };
 
-  const isWordUsed = (word: Word) =>
-    pressed.some(([a, b]) => !!b && [a, b].includes(word));
+  const getClass = (word: Word) => {
+    const pair = pressed.find(([a, b]) => a === word || b === word);
 
-  const isWordActive = (word: Word) =>
-    !!pressed[0] && !pressed[0][1] && pressed[0][0] === word;
+    if (pair) {
+      const [_, second, color] = pair;
+      return `${second ? 'done' : 'active'} ${color}`;
+    }
+
+    return '';
+  }
 
   return (
     <div className="pairs-puzzle">
       {instance.words.map(word => (
         <button
           key={word}
-          disabled={done || isWordUsed(word)}
+          disabled={done}
           onClick={onClick(word)}
-          className={
-            isWordUsed(word)
-              ? "done"
-              : isWordActive(word)
-                ? "active"
-                : "unused"
-          }
+          className={getClass(word)}
         >
           {word}
         </button>
@@ -116,7 +121,7 @@ const renderRules = ({
 }: RulesProps<Rules>): JSX.Element => {
   return (
     <div className="pairs-rules">
-      {rules.wordGrid.map((word) => <GridItem word={word} />)}
+      {rules.wordGrid.map((word) => <GridItem key={word} word={word} />)}
     </div>
   );
 }

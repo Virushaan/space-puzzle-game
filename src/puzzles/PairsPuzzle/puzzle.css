@@ -1,23 +1,40 @@
 button {
-  border: none;
+  border: 1px solid black;
   margin: 5px;
+  color: white;
+  background-color: #222;
 }
 
 button.active {
-  background: #ddf;
-}
+  border: 1px solid white;
 
-button.done {
-  background: #ddd;
-}
-
-button.unused {
-  background: white;
+  -webkit-animation: pulse 2s infinite ease-in-out;
+  -o-animation: pulse 2s infinite ease-in-out;
+  -ms-animation: pulse 2s infinite ease-in-out;
+  -moz-animation: pulse 2s infinite ease-in-out;
+  animation: pulse 2s infinite ease-in-out;
 }
 
 div.pairs-puzzle {
   display: grid;
   grid-template-columns: 1fr 1fr;
+}
+
+button.pair-a { background-color: #e80; }
+button.pair-b { background-color: #80e; }
+button.pair-c { background-color: #08e; }
+button.pair-d { background-color: #0e8; }
+
+@-webkit-keyframes pulse {
+    0% { border-color: white; }
+   50% { border-color: black; }
+  100% { border-color: white; }
+}
+
+@keyframes pulse {
+    0% { border-color: white; }
+   50% { border-color: black; }
+  100% { border-color: white; }
 }
 
 div.pairs-rules {
